@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>欠席届・振替申込</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700&family=Noto+Serif+JP:wght@700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body { font-family: 'Noto Sans JP', sans-serif; background: linear-gradient(160deg, #f0faf4 0%, #e8f5e9 50%, #f0faf4 100%); min-height: 100vh; width: 100%; overflow-x: hidden; padding-bottom: 48px; }
+    .header { background: linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%); padding: 18px 20px 14px; text-align: center; box-shadow: 0 4px 20px rgba(27,67,50,0.25); }
+    .header-sub { font-size: 10px; color: #95d5b2; letter-spacing: 3px; margin-bottom: 3px; }
+    .header-title { color: #fff; font-size: 18px; font-family: 'Noto Serif JP', serif; font-weight: 700; }
+    .container { width: 100%; max-width: 480px; margin: 0 auto; padding: 20px 16px 0; }
+    .steps { display: flex; align-items: center; justify-content: center; margin-bottom: 22px; }
+    .step-item { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .step-circle { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+    .step-circle.done { background: #2D6A4F; color: #fff; }
+    .step-circle.active { background: #52B788; color: #fff; border: 2px solid #1B4332; box-shadow: 0 0 0 3px rgba(183,228,199,0.4); }
+    .step-circle.pending { background: #e8f5e9; color: #bbb; }
+    .step-label { font-size: 9px; color: #999; white-space: nowrap; }
+    .step-label.active { color: #1B4332; font-weight: 700; }
+    .step-line { width: 20px; height: 2px; background: #ddd; margin: 0 1px 16px; flex-shrink: 0; }
+    .step-line.done { background: #52B788; }
+    .card { background: #fff; border-radius: 18px; padding: 22px 18px; box-shadow: 0 2px 16px rgba(45,106,79,0.10); border: 1.5px solid #d8f3dc; margin-bottom: 14px; }
+    .card-title { font-family: 'Noto Serif JP', serif; font-size: 16px; color: #1B4332; margin-bottom: 16px; font-weight: 700; }
+    label { display: block; font-size: 13px; color: #555; font-weight: 600; margin-bottom: 8px; }
+    input[type="number"], select { width: 100%; padding: 15px 14px; font-size: 18px; border-radius: 12px; border: 1.5px solid #b7e4c7; outline: none; font-family: 'Noto Sans JP', sans-serif; color: #1B4332; background: #f8fdf9; -webkit-appearance: none; appearance: none; display: block; }
+    select { font-size: 15px; }
+    input:focus, select:focus { border-color: #52B788; box-shadow: 0 0 0 3px rgba(82,183,136,0.15); }
+    .note { font-size: 12px; color: #888; margin-bottom: 16px; line-height: 1.7; }
+    .btn-primary { display: block; width: 100%; padding: 16px; font-size: 16px; font-weight: 700; background: linear-gradient(135deg, #52B788, #2D6A4F); color: #fff; border: none; border-radius: 14px; cursor: pointer; margin-top: 16px; font-family: 'Noto Serif JP', serif; letter-spacing: 1px; box-shadow: 0 4px 14px rgba(45,106,79,0.20); touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    .btn-primary:disabled { opacity: 0.35; }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-secondary { display: block; padding: 15px 18px; font-size: 14px; font-weight: 600; background: #f0faf4; color: #2D6A4F; border: 1.5px solid #b7e4c7; border-radius: 14px; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    .btn-secondary:active { transform: scale(0.98); }
+    .btn-row { display: flex; gap: 10px; margin-top: 18px; }
+    .btn-row .btn-primary { margin-top: 0; flex: 1; }
+    .calendar { background: #f8fdf9; border-radius: 12px; padding: 14px 10px; border: 1.5px solid #b7e4c7; }
+    .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .cal-title { font-family: 'Noto Serif JP', serif; font-weight: 700; color: #1B4332; font-size: 15px; }
+    .cal-nav { background: #e8f5e9; border: none; font-size: 20px; cursor: pointer; color: #2D6A4F; font-weight: 700; padding: 6px 16px; border-radius: 8px; touch-action: manipulation; }
+    .cal-nav:disabled { opacity: 0.2; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+    .cal-dow { font-size: 11px; padding: 4px 0; color: #777; font-weight: 600; }
+    .cal-dow.sun { color: #e63946; }
+    .cal-dow.sat { color: #457b9d; }
+    .cal-day { width: 100%; aspect-ratio: 1/1; border-radius: 50%; border: none; background: transparent; font-size: 14px; cursor: pointer; font-family: 'Noto Sans JP', sans-serif; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+    .cal-day.sun { color: #e63946; }
+    .cal-day.sat { color: #457b9d; }
+    .cal-day.future { color: #ccc; cursor: not-allowed; }
+    .cal-day.selected { background: #2D6A4F !important; color: #fff !important; font-weight: 700; }
+    .cal-day:not(.future):not(.selected):active { background: #e8f5e9; }
+    .selected-date { margin-top: 10px; font-size: 13px; color: #2D6A4F; font-weight: 600; text-align: center; padding: 8px 12px; background: #e8f5e9; border-radius: 8px; }
+    .student-badge { background: #e8f5e9; border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; }
+    .student-name { font-size: 15px; color: #2D6A4F; font-weight: 700; }
+    .student-course { font-size: 12px; color: #555; margin-top: 3px; }
+    .student-note { font-size: 11px; color: #888; margin-top: 2px; }
+    .confirm-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e8f5e9; padding: 11px 0; }
+    .confirm-row:last-child { border-bottom: none; }
+    .confirm-key { font-size: 13px; color: #888; flex-shrink: 0; margin-right: 12px; }
+    .confirm-val { font-size: 14px; color: #1B4332; font-weight: 600; text-align: right; word-break: break-all; }
+    .warning-box { background: #fffde7; border: 1px solid #ffe082; border-radius: 10px; padding: 10px 14px; margin-top: 14px; font-size: 12px; color: #795548; line-height: 1.6; }
+    .success-banner { text-align: center; padding: 26px 20px 20px; background: linear-gradient(135deg, #2D6A4F, #52B788); border-radius: 20px; color: #fff; margin-bottom: 14px; box-shadow: 0 6px 24px rgba(45,106,79,0.25); }
+    .success-icon { font-size: 42px; margin-bottom: 8px; }
+    .success-title { font-family: 'Noto Serif JP', serif; font-size: 19px; font-weight: 700; }
+    .success-name { font-size: 13px; opacity: 0.85; margin-top: 5px; }
+    .rep-box { background: #e8f5e9; border-radius: 12px; padding: 16px; margin-bottom: 14px; text-align: center; }
+    .rep-label { font-size: 12px; color: #555; margin-bottom: 4px; }
+    .rep-month { font-family: 'Noto Serif JP', serif; font-size: 24px; font-weight: 700; color: #1B4332; }
+    .rep-week { font-size: 13px; color: #2D6A4F; font-weight: 600; margin-top: 4px; }
+    .info-box { font-size: 13px; color: #444; line-height: 1.8; background: #f8fdf9; border-radius: 10px; padding: 12px 14px; }
+    .info-box ul { padding-left: 16px; }
+    .info-box li { margin-bottom: 4px; }
+    .error-msg { color: #e63946; font-size: 13px; margin-top: 10px; background: #fff0f0; padding: 10px 12px; border-radius: 8px; border: 1px solid #ffcdd2; }
+    .loading { text-align: center; padding: 14px; color: #2D6A4F; font-size: 14px; }
+    .mt-16 { margin-top: 16px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+<div class="header">
+  <div class="header-sub">LEARNING STUDIO</div>
+  <div class="header-title">欠席届・振替申込</div>
+</div>
+<div class="container">
+  <div class="steps" id="stepIndicator"></div>
+  <div id="step0" class="card">
+    <div class="card-title">学生番号を入力してください</div>
+    <p class="note">保護者の方がご利用ください。学生番号はお手元の資料をご確認ください。</p>
+    <label>学生番号</label>
+    <input type="number" id="studentId" inputmode="numeric" placeholder="例：1001">
+    <div id="idError" class="error-msg hidden"></div>
+    <button class="btn-primary" onclick="handleStep0()">次へ →</button>
+  </div>
+  <div id="step1" class="card hidden">
+    <div class="card-title">欠席日と理由を選んでください</div>
+    <div class="student-badge">
+      <div class="student-name" id="s1Name"></div>
+      <div class="student-course" id="s1Course"></div>
+      <div class="student-note" id="s1Note"></div>
+    </div>
+    <label>欠席日</label>
+    <div class="calendar">
+      <div class="cal-header">
+        <button class="cal-nav" id="calPrev" onclick="changeMonth(-1)">‹</button>
+        <div class="cal-title" id="calTitle"></div>
+        <button class="cal-nav" id="calNext" onclick="changeMonth(1)">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+    <div class="selected-date hidden" id="selectedDateText"></div>
+    <label class="mt-16">欠席理由</label>
+    <select id="reason">
+      <option value="">-- 選択してください --</option>
+      <option>体調不良・病気</option>
+      <option>学校行事</option>
+      <option>家族の都合</option>
+      <option>冠婚葬祭</option>
+      <option>その他</option>
+    </select>
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="goToStep(0)">← 戻る</button>
+      <button class="btn-primary" id="step1Next" onclick="handleStep1()" disabled>確認画面へ →</button>
+    </div>
+  </div>
+  <div id="step2" class="card hidden">
+    <div class="card-title">内容を確認してください</div>
+    <div id="confirmRows"></div>
+    <div class="warning-box">⚠ 送信後の変更はできません。内容をよくご確認ください。</div>
+    <div class="btn-row">
+      <button class="btn-secondary" onclick="goToStep(1)">← 修正する</button>
+      <button class="btn-primary" onclick="handleSubmit()">送信する ✓</button>
+    </div>
+    <div id="submitLoading" class="loading hidden">送信中...</div>
+    <div id="submitError" class="error-msg hidden"></div>
+  </div>
+  <div id="step3" class="hidden">
+    <div class="success-banner">
+      <div class="success-icon">✅</div>
+      <div class="success-title">欠席届を受け付けました</div>
+      <div class="success-name" id="s3Name"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">振替授業について</div>
+      <div class="rep-box">
+        <div class="rep-label">振替予定日</div>
+        <div class="rep-month" id="s3RepMonth"></div>
+        <div class="rep-week">最終日曜日または第5週目</div>
+      </div>
+      <div class="info-box">
+        <ul>
+          <li>振替日の詳細な時間は、<strong id="s3RepMonthNote"></strong>上旬に別途ご案内します。</li>
+          <li>欠席届の送信がない場合、振替を受講できないことがあります。</li>
+          <li id="s3CourseNote"></li>
+        </ul>
+      </div>
+    </div>
+    <button class="btn-secondary" style="width:100%;margin-top:12px" onclick="resetForm()">トップに戻る</button>
+  </div>
+</div>
+<script>
+  const GAS_URL='https://script.google.com/macros/s/AKfycbytb4yb-Bi0NcbcohiFEAEk1y4ee_iL_ynzq_n5-nTgw6LbipIazVfL4LEv8ap51Oq4/exec';
+  let currentStep=0,student=null,selectedDate=null;
+  const today=new Date();
+  let calYear=today.getFullYear(),calMonth=today.getMonth();
+  function renderSteps(){
+    const labels=['番号入力','欠席日・理由','確認・送信','振替案内'];
+    document.getElementById('stepIndicator').innerHTML=labels.map((l,i)=>{
+      const cls=i<currentStep?'done':i===currentStep?'active':'pending';
+      const icon=i<currentStep?'✓':i+1;
+      const lc=i<currentStep?'done':'';
+      return '<div class="step-item"><div class="step-circle '+cls+'">'+icon+'</div><div class="step-label '+(cls==='active'?'active':'')+'">'+l+'</div></div>'+(i<labels.length-1?'<div class="step-line '+lc+'"></div>':'');
+    }).join('');
+  }
+  function goToStep(n){
+    for(let i=0;i<=3;i++){const el=document.getElementById('step'+i);if(el)el.classList.add('hidden');}
+    currentStep=n;renderSteps();
+    const t=document.getElementById('step'+n);if(t)t.classList.remove('hidden');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  async function callGAS(action,params){
+    const url=GAS_URL+'?action='+action+'&'+new URLSearchParams(params).toString();
+    const res=await fetch(url);
+    return await res.json();
+  }
+  async function handleStep0(){
+    const id=document.getElementById('studentId').value.trim();
+    const errEl=document.getElementById('idError');
+    if(!id){showError(errEl,'学生番号を入力してください。');return;}
+    errEl.classList.add('hidden');
+    try{
+      const s=await callGAS('getStudent',{studentId:id});
+      if(!s||s.error){showError(errEl,'学生番号が見つかりません。番号をご確認ください。');return;}
+      student=s;setupStep1();goToStep(1);
+    }catch(e){showError(errEl,'エラーが発生しました。');}
+  }
+  function setupStep1(){
+    const cl=student.course==='monthly'?'週2回60分・週1回120分コース':'週1回60分コース';
+    const cn=student.course==='monthly'?'毎月1回まで振替申込ができます。':'2ヶ月に1回まで振替申込ができます。';
+    document.getElementById('s1Name').textContent=student.name+' さん';
+    document.getElementById('s1Course').textContent=cl;
+    document.getElementById('s1Note').textContent=cn;
+    renderCalendar();
+  }
+  function renderCalendar(){
+    const M=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+    document.getElementById('calTitle').textContent=calYear+'年 '+M[calMonth];
+    const minDate=new Date(today.getFullYear()-1,today.getMonth(),1);
+    document.getElementById('calPrev').disabled=new Date(calYear,calMonth,1)<=minDate;
+    document.getElementById('calNext').disabled=calYear>today.getFullYear()||(calYear===today.getFullYear()&&calMonth>=today.getMonth());
+    const firstDay=new Date(calYear,calMonth,1).getDay();
+    const dim=new Date(calYear,calMonth+1,0).getDate();
+    const dc=['sun','','','','','','sat'];
+    let html=['日','月','火','水','木','金','土'].map((d,i)=>'<div class="cal-dow '+dc[i]+'">'+d+'</div>').join('');
+    for(let i=0;i<firstDay;i++)html+='<div></div>';
+    for(let d=1;d<=dim;d++){
+      const dt=new Date(calYear,calMonth,d);
+      const iF=dt>today,dow=dt.getDay();
+      const iS=selectedDate&&selectedDate.getFullYear()===calYear&&selectedDate.getMonth()===calMonth&&selectedDate.getDate()===d;
+      const cls=['cal-day',dow===0?'sun':dow===6?'sat':'',iF?'future':'',iS?'selected':''].filter(Boolean).join(' ');
+      html+='<button class="'+cls+'" '+(iF?'disabled':'')+' onclick="selectDate('+calYear+','+calMonth+','+d+')">'+d+'</button>';
+    }
+    document.getElementById('calGrid').innerHTML=html;
+  }
+  function selectDate(y,m,d){
+    selectedDate=new Date(y,m,d);
+    const el=document.getElementById('selectedDateText');
+    el.textContent='✓ '+y+'年'+(m+1)+'月'+d+'日を選択中';
+    el.classList.remove('hidden');
+    renderCalendar();checkStep1();
+  }
+  function changeMonth(dir){
+    calMonth+=dir;
+    if(calMonth<0){calMonth=11;calYear--;}
+    if(calMonth>11){calMonth=0;calYear++;}
+    renderCalendar();
+  }
+  function checkStep1(){
+    document.getElementById('step1Next').disabled=!(selectedDate&&document.getElementById('reason').value);
+  }
+  document.addEventListener('DOMContentLoaded',function(){
+    document.getElementById('reason').addEventListener('change',checkStep1);
+  });
+  function handleStep1(){
+    if(!selectedDate||!document.getElementById('reason').value)return;
+    const cl=student.course==='monthly'?'週2回60分・週1回120分コース':'週1回60分コース';
+    const sd=selectedDate;
+    const dateStr=sd.getFullYear()+'年'+(sd.getMonth()+1)+'月'+sd.getDate()+'日';
+    const rows=[['お名前',student.name],['学生番号',student.id],['コース',cl],['欠席日',dateStr],['欠席理由',document.getElementById('reason').value]];
+    document.getElementById('confirmRows').innerHTML=rows.map(function(r){return '<div class="confirm-row"><span class="confirm-key">'+r[0]+'</span><span class="confirm-val">'+r[1]+'</span></div>';}).join('');
+    goToStep(2);
+  }
+  async function handleSubmit(){
+    document.getElementById('submitLoading').classList.remove('hidden');
+    document.getElementById('submitError').classList.add('hidden');
+    const sd=selectedDate;
+    const dateStr=sd.getFullYear()+'-'+(sd.getMonth()+1)+'-'+sd.getDate();
+    try{
+      const res=await callGAS('submitAbsence',{studentId:student.id,absenceDate:dateStr,reason:document.getElementById('reason').value});
+      document.getElementById('submitLoading').classList.add('hidden');
+      if(!res.success){showError(document.getElementById('submitError'),res.error);return;}
+      document.getElementById('s3Name').textContent=res.studentName+' さん';
+      document.getElementById('s3RepMonth').textContent=res.replacementYear+'年'+res.replacementMonth+'月';
+      document.getElementById('s3RepMonthNote').textContent=res.replacementMonth+'月';
+      document.getElementById('s3CourseNote').textContent=res.course==='monthly'?'毎月1回まで振替申込ができます。':'2ヶ月に1回まで振替申込ができます。';
+      goToStep(3);
+    }catch(e){
+      document.getElementById('submitLoading').classList.add('hidden');
+      showError(document.getElementById('submitError'),'エラーが発生しました。もう一度お試しください。');
+    }
+  }
+  function resetForm(){
+    student=null;selectedDate=null;
+    calYear=today.getFullYear();calMonth=today.getMonth();
+    document.getElementById('studentId').value='';
+    document.getElementById('reason').value='';
+    document.getElementById('selectedDateText').classList.add('hidden');
+    goToStep(0);
+  }
+  function showError(el,msg){el.textContent='⚠ '+msg;el.classList.remove('hidden');}
+  renderSteps();
+</script>
+</body>
+</html>
