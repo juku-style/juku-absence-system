@@ -197,7 +197,7 @@
     }catch(e){showError(errEl,'エラーが発生しました。');}
   }
   function setupStep1(){
-    const cl=student.course==='monthly'?'週2回60分・週1回120分コース':'週1回60分コース';
+    const cl=student.course==='monthly'?'週2回60分・週2回90分・週1回120分 コース':'週1回60分・週1回90分 コース';
     const cn=student.course==='monthly'?'毎月1回まで振替申込ができます。':'2ヶ月に1回まで振替申込ができます。';
     document.getElementById('s1Name').textContent=student.name+' さん';
     document.getElementById('s1Course').textContent=cl;
@@ -207,8 +207,8 @@
   function renderCalendar(){
     const M=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
     document.getElementById('calTitle').textContent=calYear+'年 '+M[calMonth];
-    const minDate=new Date(today.getFullYear()-1,today.getMonth(),1);
-    document.getElementById('calPrev').disabled=new Date(calYear,calMonth,1)<=minDate;
+    const minDate=new Date(today.getFullYear(),today.getMonth()-1,today.getDate());
+    document.getElementById('calPrev').disabled=new Date(calYear,calMonth,1)<=new Date(today.getFullYear(),today.getMonth()-1,1);
     document.getElementById('calNext').disabled=calYear>today.getFullYear()||(calYear===today.getFullYear()&&calMonth>=today.getMonth());
     const firstDay=new Date(calYear,calMonth,1).getDay();
     const dim=new Date(calYear,calMonth+1,0).getDate();
@@ -217,10 +217,11 @@
     for(let i=0;i<firstDay;i++)html+='<div></div>';
     for(let d=1;d<=dim;d++){
       const dt=new Date(calYear,calMonth,d);
-      const iF=dt>today,dow=dt.getDay();
+      const iF=dt>today,iP=dt<minDate,dow=dt.getDay();
+      const disabled=iF||iP;
       const iS=selectedDate&&selectedDate.getFullYear()===calYear&&selectedDate.getMonth()===calMonth&&selectedDate.getDate()===d;
-      const cls=['cal-day',dow===0?'sun':dow===6?'sat':'',iF?'future':'',iS?'selected':''].filter(Boolean).join(' ');
-      html+='<button class="'+cls+'" '+(iF?'disabled':'')+' onclick="selectDate('+calYear+','+calMonth+','+d+')">'+d+'</button>';
+      const cls=['cal-day',dow===0?'sun':dow===6?'sat':'',disabled?'future':'',iS?'selected':''].filter(Boolean).join(' ');
+      html+='<button class="'+cls+'" '+(disabled?'disabled':'')+' onclick="selectDate('+calYear+','+calMonth+','+d+')">'+d+'</button>';
     }
     document.getElementById('calGrid').innerHTML=html;
   }
@@ -245,7 +246,7 @@
   });
   function handleStep1(){
     if(!selectedDate||!document.getElementById('reason').value)return;
-    const cl=student.course==='monthly'?'週2回60分・週1回120分コース':'週1回60分コース';
+    const cl=student.course==='monthly'?'週2回60分・週2回90分・週1回120分 コース':'週1回60分・週1回90分 コース';
     const sd=selectedDate;
     const dateStr=sd.getFullYear()+'年'+(sd.getMonth()+1)+'月'+sd.getDate()+'日';
     const rows=[['お名前',student.name],['学生番号',student.id],['コース',cl],['欠席日',dateStr],['欠席理由',document.getElementById('reason').value]];
