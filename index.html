@@ -208,8 +208,9 @@
     const M=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
     document.getElementById('calTitle').textContent=calYear+'年 '+M[calMonth];
     const minDate=new Date(today.getFullYear(),today.getMonth()-1,today.getDate());
+    const maxDate=new Date(today.getFullYear(),today.getMonth()+1,today.getDate());
     document.getElementById('calPrev').disabled=new Date(calYear,calMonth,1)<=new Date(today.getFullYear(),today.getMonth()-1,1);
-    document.getElementById('calNext').disabled=calYear>today.getFullYear()||(calYear===today.getFullYear()&&calMonth>=today.getMonth());
+    document.getElementById('calNext').disabled=calYear>maxDate.getFullYear()||(calYear===maxDate.getFullYear()&&calMonth>=maxDate.getMonth());
     const firstDay=new Date(calYear,calMonth,1).getDay();
     const dim=new Date(calYear,calMonth+1,0).getDate();
     const dc=['sun','','','','','','sat'];
@@ -217,7 +218,7 @@
     for(let i=0;i<firstDay;i++)html+='<div></div>';
     for(let d=1;d<=dim;d++){
       const dt=new Date(calYear,calMonth,d);
-      const iF=dt>today,iP=dt<minDate,dow=dt.getDay();
+      const iF=dt>maxDate,iP=dt<minDate,dow=dt.getDay();
       const disabled=iF||iP;
       const iS=selectedDate&&selectedDate.getFullYear()===calYear&&selectedDate.getMonth()===calMonth&&selectedDate.getDate()===d;
       const cls=['cal-day',dow===0?'sun':dow===6?'sat':'',disabled?'future':'',iS?'selected':''].filter(Boolean).join(' ');
