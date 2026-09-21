@@ -142,7 +142,7 @@
       <div class="success-title">欠席届を受け付けました</div>
       <div class="success-name" id="s3Name"></div>
     </div>
-    <div class="card">
+    <div id="s3RepBox" class="card">
       <div class="card-title">振替授業について</div>
       <div class="rep-box">
         <div class="rep-label">振替予定日</div>
@@ -154,6 +154,15 @@
           <li>振替日の詳細な時間は、<strong id="s3RepMonthNote"></strong>上旬に別途ご案内します。</li>
           <li>欠席届の送信がない場合、振替を受講できないことがあります。</li>
           <li id="s3CourseNote"></li>
+        </ul>
+      </div>
+    </div>
+    <div id="s3NoRepBox" class="card hidden">
+      <div class="card-title">⚠ 今回は振替の対象外です</div>
+      <div class="info-box">
+        <ul>
+          <li><strong id="s3NoRepDate"></strong>に既に振替申込済みのため、今回の欠席は振替の対象外となります。</li>
+          <li>欠席の記録は受け付けました。</li>
         </ul>
       </div>
     </div>
@@ -264,9 +273,17 @@
       document.getElementById('submitLoading').classList.add('hidden');
       if(!res.success){showError(document.getElementById('submitError'),res.error);return;}
       document.getElementById('s3Name').textContent=res.studentName+' さん';
-      document.getElementById('s3RepMonth').textContent=res.replacementYear+'年'+res.replacementMonth+'月';
-      document.getElementById('s3RepMonthNote').textContent=res.replacementMonth+'月';
-      document.getElementById('s3CourseNote').textContent=res.course==='monthly'?'毎月1回まで振替申込ができます。':'2ヶ月に1回まで振替申込ができます。';
+      if(res.noReplacement){
+        document.getElementById('s3RepBox').classList.add('hidden');
+        document.getElementById('s3NoRepBox').classList.remove('hidden');
+        document.getElementById('s3NoRepDate').textContent=res.existingDate;
+      } else {
+        document.getElementById('s3RepBox').classList.remove('hidden');
+        document.getElementById('s3NoRepBox').classList.add('hidden');
+        document.getElementById('s3RepMonth').textContent=res.replacementYear+'年'+res.replacementMonth+'月';
+        document.getElementById('s3RepMonthNote').textContent=res.replacementMonth+'月';
+        document.getElementById('s3CourseNote').textContent=res.course==='monthly'?'毎月1回まで振替申込ができます。':'2ヶ月に1回まで振替申込ができます。';
+      }
       goToStep(3);
     }catch(e){
       document.getElementById('submitLoading').classList.add('hidden');
