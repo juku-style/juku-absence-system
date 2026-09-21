@@ -216,9 +216,9 @@
   function renderCalendar(){
     const M=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
     document.getElementById('calTitle').textContent=calYear+'年 '+M[calMonth];
-    const minDate=new Date(today.getFullYear(),today.getMonth()-1,today.getDate());
+    const minDate=new Date(today.getFullYear(),today.getMonth(),today.getDate()-14);
     const maxDate=new Date(today.getFullYear(),today.getMonth()+1,today.getDate());
-    document.getElementById('calPrev').disabled=new Date(calYear,calMonth,1)<=new Date(today.getFullYear(),today.getMonth()-1,1);
+    const minMonth=new Date(today.getFullYear(),today.getMonth(),today.getDate()-14);document.getElementById('calPrev').disabled=new Date(calYear,calMonth,1)<=new Date(minMonth.getFullYear(),minMonth.getMonth(),1);
     document.getElementById('calNext').disabled=calYear>maxDate.getFullYear()||(calYear===maxDate.getFullYear()&&calMonth>=maxDate.getMonth());
     const firstDay=new Date(calYear,calMonth,1).getDay();
     const dim=new Date(calYear,calMonth+1,0).getDate();
