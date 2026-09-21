@@ -273,16 +273,20 @@
       document.getElementById('submitLoading').classList.add('hidden');
       if(!res.success){showError(document.getElementById('submitError'),res.error);return;}
       document.getElementById('s3Name').textContent=res.studentName+' さん';
-      if(res.noReplacement){
+      if(res.noReplacement===true){
         document.getElementById('s3RepBox').classList.add('hidden');
         document.getElementById('s3NoRepBox').classList.remove('hidden');
-        document.getElementById('s3NoRepDate').textContent=res.existingDate;
-      } else {
+        document.getElementById('s3NoRepDate').textContent=res.existingDate||'';
+      } else if(res.replacementYear && res.replacementMonth){
         document.getElementById('s3RepBox').classList.remove('hidden');
         document.getElementById('s3NoRepBox').classList.add('hidden');
         document.getElementById('s3RepMonth').textContent=res.replacementYear+'年'+res.replacementMonth+'月';
         document.getElementById('s3RepMonthNote').textContent=res.replacementMonth+'月';
         document.getElementById('s3CourseNote').textContent=res.course==='monthly'?'毎月1回まで振替申込ができます。':'2ヶ月に1回まで振替申込ができます。';
+      } else {
+        document.getElementById('s3RepBox').classList.add('hidden');
+        document.getElementById('s3NoRepBox').classList.remove('hidden');
+        document.getElementById('s3NoRepDate').textContent='（詳細はお問い合わせください）';
       }
       goToStep(3);
     }catch(e){
